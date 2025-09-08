@@ -1,28 +1,26 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import { Provider } from 'react-redux';
+import store from './src/store';
 
-import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
+import CoursesScreen from './src/features/courses/CoursesScreen';
+// You should create this screen or replace with your actual detail screen
+import CourseDetailScreen from './src/features/courses/CourseDetailScreen';
 
-function App() {
-  const isDarkMode = useColorScheme() === 'dark';
+const Stack = createStackNavigator();
 
+const App = () => {
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <NewAppScreen templateFileName="App.tsx" />
-    </View>
+    <Provider store={store}>
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="Courses">
+          <Stack.Screen name="Courses" component={CoursesScreen} />
+          <Stack.Screen name="CourseDetail" component={CourseDetailScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </Provider>
   );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
+};
 
 export default App;
