@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import RNBootSplash from 'react-native-bootsplash';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Provider } from 'react-redux';
@@ -11,6 +12,9 @@ import CourseDetailScreen from './src/features/courses/CourseDetailScreen';
 const Stack = createStackNavigator();
 
 const App = () => {
+    useEffect(() => {
+    RNBootSplash.hide({ fade: true });
+  }, []);
   return (
     <Provider store={store}>
       <NavigationContainer>
