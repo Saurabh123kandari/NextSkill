@@ -1,97 +1,161 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# NextSkill - Education Application
 
-# Getting Started
+A comprehensive React Native education application designed for students to learn, track progress, and engage with educational content.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## 🚀 Features
 
-## Step 1: Start Metro
+- **User Authentication**: Secure login, registration, and password recovery
+- **Course Management**: Browse, search, and filter courses by category and level
+- **Learning Progress**: Track completion status and time spent on lessons
+- **Quiz System**: Interactive quizzes with multiple question types
+- **Achievement System**: Gamification with badges and milestones
+- **Offline Support**: Download content for offline learning
+- **Progress Analytics**: Visual progress tracking and statistics
+- **Responsive Design**: Optimized for both iOS and Android
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## 📁 Project Structure
 
-To start the Metro dev server, run the following command from the root of your React Native project:
-
-```sh
-# Using npm
-npm start
-
-# OR using Yarn
-yarn start
+```
+src/
+├── components/           # Reusable UI components
+│   ├── common/          # Common components (buttons, inputs, etc.)
+│   ├── course/          # Course-specific components
+│   ├── quiz/            # Quiz-related components
+│   ├── auth/            # Authentication components
+│   └── profile/         # Profile-related components
+├── screens/             # Screen components
+│   ├── auth/            # Authentication screens
+│   ├── course/          # Course-related screens
+│   ├── quiz/            # Quiz screens
+│   ├── profile/         # Profile screens
+│   ├── home/            # Home screen
+│   └── settings/        # Settings screens
+├── navigation/          # Navigation configuration
+├── services/            # API and business logic
+│   ├── api/            # API service layer
+│   ├── auth/           # Authentication services
+│   ├── storage/        # Local storage services
+│   └── offline/        # Offline data management
+├── contexts/           # React contexts for state management
+├── hooks/              # Custom React hooks
+├── types/              # TypeScript type definitions
+├── constants/          # App constants and configuration
+├── utils/              # Utility functions
+├── store/              # State management (Redux/Zustand)
+└── assets/             # Static assets
+    ├── images/         # Image assets
+    ├── icons/          # Icon assets
+    └── fonts/          # Font files
 ```
 
-## Step 2: Build and run your app
+## 🛠️ Technology Stack
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+- **React Native**: Cross-platform mobile development
+- **TypeScript**: Type-safe JavaScript
+- **React Navigation**: Navigation library
+- **AsyncStorage**: Local data persistence
+- **Axios**: HTTP client for API calls
+- **React Context**: State management
+- **React Hooks**: Functional components and state
 
-### Android
+## 📱 Key Screens
 
-```sh
-# Using npm
-npm run android
+### Authentication
+- **Login Screen**: User authentication with email/password
+- **Register Screen**: New user registration
+- **Forgot Password**: Password recovery flow
 
-# OR using Yarn
-yarn android
-```
+### Main Application
+- **Home Screen**: Dashboard with progress overview and featured content
+- **Courses Screen**: Browse and search courses with filtering
+- **Progress Screen**: Learning analytics and achievements
+- **Profile Screen**: User profile and settings
 
-### iOS
+### Learning Experience
+- **Course Detail**: Course information and enrollment
+- **Lesson Detail**: Video player and lesson content
+- **Quiz Detail**: Interactive quiz interface
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+## 🎨 Design System
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+### Colors
+- **Primary**: #6200EE (Purple)
+- **Secondary**: #03DAC6 (Teal)
+- **Success**: #4CAF50 (Green)
+- **Warning**: #FF9800 (Orange)
+- **Error**: #F44336 (Red)
 
-```sh
-bundle install
-```
+### Typography
+- **H1**: 32px, Bold
+- **H2**: 24px, Bold
+- **H3**: 20px, Semi-bold
+- **Body**: 16px, Regular
+- **Caption**: 14px, Regular
 
-Then, and every time you update your native dependencies, run:
+## 🔧 Setup Instructions
 
-```sh
-bundle exec pod install
-```
+1. **Install Dependencies**
+   ```bash
+   npm install
+   ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+2. **iOS Setup**
+   ```bash
+   cd ios && pod install && cd ..
+   ```
 
-```sh
-# Using npm
-npm run ios
+3. **Run the Application**
+   ```bash
+   # iOS
+   npm run ios
+   
+   # Android
+   npm run android
+   ```
 
-# OR using Yarn
-yarn ios
-```
+## 📦 Key Dependencies
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+- `@react-navigation/native`: Navigation
+- `@react-navigation/stack`: Stack navigation
+- `@react-navigation/bottom-tabs`: Tab navigation
+- `@react-native-async-storage/async-storage`: Local storage
+- `react-native-paper`: Material Design components
+- `react-native-vector-icons`: Icon library
+- `react-native-video`: Video player
+- `react-native-chart-kit`: Progress charts
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+## 🚀 Getting Started
 
-## Step 3: Modify your app
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. For iOS: `cd ios && pod install && cd ..`
+4. Run the app: `npm run ios` or `npm run android`
 
-Now that you have successfully run the app, let's make changes!
+## 📋 TODO
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+- [ ] Implement video player for lessons
+- [ ] Add quiz functionality with timer
+- [ ] Implement offline content download
+- [ ] Add push notifications
+- [ ] Create achievement system
+- [ ] Add social features (discussions, comments)
+- [ ] Implement payment integration
+- [ ] Add accessibility features
+- [ ] Create admin dashboard
+- [ ] Add analytics and reporting
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+## 🤝 Contributing
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
 
-## Congratulations! :tada:
+## 📄 License
 
-You've successfully run and modified your React Native App. :partying_face:
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-### Now what?
+## 📞 Support
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+For support and questions, please contact the development team or create an issue in the repository.
