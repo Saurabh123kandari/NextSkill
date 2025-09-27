@@ -12,20 +12,31 @@ import {
   ActivityIndicator,
 } from 'react-native';
 
-interface LoginScreenProps {
-  onLogin: (email: string, password: string) => Promise<void>;
-  onNavigateToSignup: () => void;
+interface SignupScreenProps {
+  onSignup: (userData: SignupData) => Promise<void>;
+  onNavigateToLogin: () => void;
   isLoading?: boolean;
 }
 
-const LoginScreen: React.FC<LoginScreenProps> = ({
-  onLogin,
-  onNavigateToSignup,
+interface SignupData {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
+
+const SignupScreen: React.FC<SignupScreenProps> = ({
+  onSignup,
+  onNavigateToLogin,
   isLoading = false,
 }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [formData, setFormData] = useState<SignupData>({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  });
+  const [errors, setErrors] = useState<Partial<SignupData>>({});
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -33,38 +44,67 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
   };
 
   const validateForm = (): boolean => {
-    const newErrors: { email?: string; password?: string } = {};
+    const newErrors: Partial<SignupData> = {};
 
-    if (!email.trim()) {
+    if (!formData.name.trim()) {
+      newErrors.name = 'Full name is required';
+    } else if (formData.name.trim().length < 2) {
+      newErrors.name = 'Name must be at least 2 characters';
+    }
+
+    if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
-    } else if (!validateEmail(email)) {
+    } else if (!validateEmail(formData.email)) {
       newErrors.email = 'Please enter a valid email address';
     }
 
-    if (!password.trim()) {
+    if (!formData.password.trim()) {
       newErrors.password = 'Password is required';
-    } else if (password.length < 6) {
+    } else if (formData.password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters';
+    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
+      newErrors.password = 'Password must contain uppercase, lowercase, and number';
+    }
+
+    if (!formData.confirmPassword.trim()) {
+      newErrors.confirmPassword = 'Please confirm your password';
+    } else if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleLogin = async () => {
-    if (!validateForm()) return;
-
-    try {
-      await onLogin(email.trim(), password);
-    } catch (error: any) {
-      Alert.alert('Login Failed', error.message || 'An error occurred during login');
+  const handleInputChange = (field: keyof SignupData, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: undefined }));
     }
   };
 
-  const handleForgotPassword = () => {
+  const handleSignup = async () => {
+    if (!validateForm()) return;
+
+    try {
+      await onSignup(formData);
+    } catch (error: any) {
+      Alert.alert('Signup Failed', error.message || 'An error occurred during signup');
+    }
+  };
+
+  const handleTermsPress = () => {
     Alert.alert(
-      'Forgot Password',
-      'Password reset functionality will be implemented soon.',
+      'Terms of Service',
+      'Terms of service will be implemented soon.',
+      [{ text: 'OK' }]
+    );
+  };
+
+  const handlePrivacyPress = () => {
+    Alert.alert(
+      'Privacy Policy',
+      'Privacy policy will be implemented soon.',
       [{ text: 'OK' }]
     );
   };
@@ -77,23 +117,32 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
         <View style={styles.content}>
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.title}>Welcome Back</Text>
-            <Text style={styles.subtitle}>Sign in to continue your learning journey</Text>
+            <Text style={styles.title}>Create Account</Text>
+            <Text style={styles.subtitle}>Join thousands of students learning online</Text>
           </View>
 
           {/* Form */}
           <View style={styles.form}>
             <View style={styles.inputContainer}>
+              <Text style={styles.label}>Full Name</Text>
+              <TextInput
+                style={[styles.input, errors.name && styles.inputError]}
+                value={formData.name}
+                onChangeText={(value) => handleInputChange('name', value)}
+                placeholder="Enter your full name"
+                autoCapitalize="words"
+                autoCorrect={false}
+                editable={!isLoading}
+              />
+              {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
+            </View>
+
+            <View style={styles.inputContainer}>
               <Text style={styles.label}>Email Address</Text>
               <TextInput
                 style={[styles.input, errors.email && styles.inputError]}
-                value={email}
-                onChangeText={(text) => {
-                  setEmail(text);
-                  if (errors.email) {
-                    setErrors({ ...errors, email: undefined });
-                  }
-                }}
+                value={formData.email}
+                onChangeText={(value) => handleInputChange('email', value)}
                 placeholder="Enter your email"
                 keyboardType="email-address"
                 autoCapitalize="none"
@@ -107,14 +156,9 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
               <Text style={styles.label}>Password</Text>
               <TextInput
                 style={[styles.input, errors.password && styles.inputError]}
-                value={password}
-                onChangeText={(text) => {
-                  setPassword(text);
-                  if (errors.password) {
-                    setErrors({ ...errors, password: undefined });
-                  }
-                }}
-                placeholder="Enter your password"
+                value={formData.password}
+                onChangeText={(value) => handleInputChange('password', value)}
+                placeholder="Create a password"
                 secureTextEntry
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -123,23 +167,47 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
               {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
             </View>
 
-            <TouchableOpacity
-              style={styles.forgotPassword}
-              onPress={handleForgotPassword}
-              disabled={isLoading}>
-              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-            </TouchableOpacity>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Confirm Password</Text>
+              <TextInput
+                style={[styles.input, errors.confirmPassword && styles.inputError]}
+                value={formData.confirmPassword}
+                onChangeText={(value) => handleInputChange('confirmPassword', value)}
+                placeholder="Confirm your password"
+                secureTextEntry
+                autoCapitalize="none"
+                autoCorrect={false}
+                editable={!isLoading}
+              />
+              {errors.confirmPassword && (
+                <Text style={styles.errorText}>{errors.confirmPassword}</Text>
+              )}
+            </View>
 
             <TouchableOpacity
-              style={[styles.loginButton, isLoading && styles.disabledButton]}
-              onPress={handleLogin}
+              style={[styles.signupButton, isLoading && styles.disabledButton]}
+              onPress={handleSignup}
               disabled={isLoading}>
               {isLoading ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
-                <Text style={styles.loginButtonText}>Sign In</Text>
+                <Text style={styles.signupButtonText}>Create Account</Text>
               )}
             </TouchableOpacity>
+          </View>
+
+          {/* Terms and Privacy */}
+          <View style={styles.termsContainer}>
+            <Text style={styles.termsText}>
+              By creating an account, you agree to our{' '}
+              <Text style={styles.linkText} onPress={handleTermsPress}>
+                Terms of Service
+              </Text>{' '}
+              and{' '}
+              <Text style={styles.linkText} onPress={handlePrivacyPress}>
+                Privacy Policy
+              </Text>
+            </Text>
           </View>
 
           {/* Divider */}
@@ -149,21 +217,21 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
             <View style={styles.dividerLine} />
           </View>
 
-          {/* Social Login */}
+          {/* Social Signup */}
           <View style={styles.socialContainer}>
             <TouchableOpacity style={styles.socialButton} disabled={isLoading}>
-              <Text style={styles.socialButtonText}>Continue with Google</Text>
+              <Text style={styles.socialButtonText}>Sign up with Google</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.socialButton} disabled={isLoading}>
-              <Text style={styles.socialButtonText}>Continue with Apple</Text>
+              <Text style={styles.socialButtonText}>Sign up with Apple</Text>
             </TouchableOpacity>
           </View>
 
           {/* Footer */}
           <View style={styles.footer}>
-            <Text style={styles.footerText}>Don't have an account? </Text>
-            <TouchableOpacity onPress={onNavigateToSignup} disabled={isLoading}>
-              <Text style={styles.signUpText}>Sign Up</Text>
+            <Text style={styles.footerText}>Already have an account? </Text>
+            <TouchableOpacity onPress={onNavigateToLogin} disabled={isLoading}>
+              <Text style={styles.signInText}>Sign In</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -203,7 +271,7 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   form: {
-    marginBottom: 32,
+    marginBottom: 24,
   },
   inputContainer: {
     marginBottom: 20,
@@ -231,16 +299,7 @@ const styles = StyleSheet.create({
     color: '#F44336',
     marginTop: 4,
   },
-  forgotPassword: {
-    alignSelf: 'flex-end',
-    marginBottom: 24,
-  },
-  forgotPasswordText: {
-    fontSize: 14,
-    color: '#6200EE',
-    fontWeight: '500',
-  },
-  loginButton: {
+  signupButton: {
     backgroundColor: '#6200EE',
     borderRadius: 12,
     paddingVertical: 16,
@@ -257,10 +316,23 @@ const styles = StyleSheet.create({
     shadowOpacity: 0,
     elevation: 0,
   },
-  loginButtonText: {
+  signupButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
+  },
+  termsContainer: {
+    marginBottom: 24,
+  },
+  termsText: {
+    fontSize: 14,
+    color: '#666666',
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  linkText: {
+    color: '#6200EE',
+    fontWeight: '500',
   },
   divider: {
     flexDirection: 'row',
@@ -303,11 +375,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666666',
   },
-  signUpText: {
+  signInText: {
     fontSize: 16,
     color: '#6200EE',
     fontWeight: '600',
   },
 });
 
-export default LoginScreen;
+export default SignupScreen;

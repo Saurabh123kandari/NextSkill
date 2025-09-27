@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+yarn.lock
+package-lock.json
+
+# Build outputs
+android/
+ios/
+dist/
+build/
+.expo/
+
+# Generated files
+*.generated.*
+*.d.ts
+
+# Config files that should not be formatted
+*.config.js
+*.config.ts
+babel.config.js
+metro.config.js
+
+# Documentation that should maintain its formatting
+README.md
+CHANGELOG.md
+
+# Other
+.git/
+.vscode/
+.idea/
+*.log

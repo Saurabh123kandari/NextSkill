@@ -1,175 +1,61 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   View,
   Text,
-  ScrollView,
   StyleSheet,
+  ScrollView,
   TouchableOpacity,
-  Image,
-  FlatList,
-  RefreshControl,
+  Alert,
 } from 'react-native';
 import { useAuth } from '../../contexts/AuthContext';
-import { Course, Achievement } from '../../types';
-import { COURSE_CATEGORIES } from '../../constants';
 
-const HomeScreen: React.FC = () => {
+interface HomeScreenProps {
+  onLogout: () => void;
+}
+
+const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
   const { user } = useAuth();
-  const [refreshing, setRefreshing] = useState(false);
-  const [featuredCourses, setFeaturedCourses] = useState<Course[]>([]);
-  const [recentCourses, setRecentCourses] = useState<Course[]>([]);
-  const [achievements, setAchievements] = useState<Achievement[]>([]);
 
-  useEffect(() => {
-    loadHomeData();
-  }, []);
-
-  const loadHomeData = async () => {
-    // This would typically fetch data from your API
-    // For now, we'll use mock data
-    setFeaturedCourses(getMockFeaturedCourses());
-    setRecentCourses(getMockRecentCourses());
-    setAchievements(getMockAchievements());
+  const handleLogout = () => {
+    Alert.alert(
+      'Logout',
+      'Are you sure you want to logout?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Logout', style: 'destructive', onPress: onLogout },
+      ]
+    );
   };
 
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await loadHomeData();
-    setRefreshing(false);
+  const handleCoursePress = () => {
+    Alert.alert('Course', 'Course details will be implemented soon.');
   };
 
-  const getMockFeaturedCourses = (): Course[] => [
-    {
-      id: '1',
-      title: 'React Native Fundamentals',
-      description: 'Learn the basics of React Native development',
-      instructor: 'John Doe',
-      thumbnail: 'https://via.placeholder.com/300x200',
-      duration: 120,
-      level: 'beginner',
-      category: 'Programming',
-      rating: 4.8,
-      studentsCount: 1250,
-      lessons: [],
-      isEnrolled: true,
-      progress: 65,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    {
-      id: '2',
-      title: 'Advanced JavaScript',
-      description: 'Master advanced JavaScript concepts',
-      instructor: 'Jane Smith',
-      thumbnail: 'https://via.placeholder.com/300x200',
-      duration: 180,
-      level: 'advanced',
-      category: 'Programming',
-      rating: 4.9,
-      studentsCount: 890,
-      lessons: [],
-      isEnrolled: false,
-      progress: 0,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-  ];
+  const handleQuizPress = () => {
+    Alert.alert('Quiz', 'Quiz functionality will be implemented soon.');
+  };
 
-  const getMockRecentCourses = (): Course[] => [
-    {
-      id: '3',
-      title: 'UI/UX Design Principles',
-      description: 'Learn design fundamentals',
-      instructor: 'Mike Johnson',
-      thumbnail: 'https://via.placeholder.com/300x200',
-      duration: 90,
-      level: 'intermediate',
-      category: 'Design',
-      rating: 4.7,
-      studentsCount: 650,
-      lessons: [],
-      isEnrolled: true,
-      progress: 30,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-  ];
-
-  const getMockAchievements = (): Achievement[] => [
-    {
-      id: '1',
-      title: 'First Course Completed',
-      description: 'Completed your first course',
-      icon: '🎓',
-      type: 'course',
-      criteria: { coursesCompleted: 1 },
-      points: 100,
-      isUnlocked: true,
-      unlockedAt: new Date(),
-    },
-    {
-      id: '2',
-      title: 'Quiz Master',
-      description: 'Passed 10 quizzes',
-      icon: '🧠',
-      type: 'quiz',
-      criteria: { quizzesPassed: 10 },
-      points: 200,
-      isUnlocked: false,
-    },
-  ];
-
-  const renderCourseCard = ({ item }: { item: Course }) => (
-    <TouchableOpacity style={styles.courseCard}>
-      <Image source={{ uri: item.thumbnail }} style={styles.courseThumbnail} />
-      <View style={styles.courseInfo}>
-        <Text style={styles.courseTitle} numberOfLines={2}>
-          {item.title}
-        </Text>
-        <Text style={styles.courseInstructor}>{item.instructor}</Text>
-        <View style={styles.courseMeta}>
-          <Text style={styles.courseRating}>⭐ {item.rating}</Text>
-          <Text style={styles.courseDuration}>{item.duration} min</Text>
-        </View>
-        {item.isEnrolled && (
-          <View style={styles.progressContainer}>
-            <View style={styles.progressBar}>
-              <View
-                style={[styles.progressFill, { width: `${item.progress}%` }]}
-              />
-            </View>
-            <Text style={styles.progressText}>{item.progress}%</Text>
-          </View>
-        )}
-      </View>
-    </TouchableOpacity>
-  );
-
-  const renderAchievement = ({ item }: { item: Achievement }) => (
-    <View style={[styles.achievementCard, !item.isUnlocked && styles.lockedAchievement]}>
-      <Text style={styles.achievementIcon}>{item.icon}</Text>
-      <View style={styles.achievementInfo}>
-        <Text style={styles.achievementTitle}>{item.title}</Text>
-        <Text style={styles.achievementDescription}>{item.description}</Text>
-        <Text style={styles.achievementPoints}>{item.points} points</Text>
-      </View>
-    </View>
-  );
+  const handleProgressPress = () => {
+    Alert.alert('Progress', 'Progress tracking will be implemented soon.');
+  };
 
   return (
-    <ScrollView
-      style={styles.container}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }>
-      {/* Welcome Section */}
-      <View style={styles.welcomeSection}>
-        <Text style={styles.welcomeText}>
-          Welcome back, {user?.name || 'Student'}! 👋
-        </Text>
-        <Text style={styles.welcomeSubtext}>
-          Ready to continue your learning journey?
-        </Text>
+    <ScrollView style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.headerContent}>
+          <View>
+            <Text style={styles.welcomeText}>
+              Welcome back, {user?.name || 'Student'}! 👋
+            </Text>
+            <Text style={styles.welcomeSubtext}>
+              Ready to continue your learning journey?
+            </Text>
+          </View>
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+            <Text style={styles.logoutButtonText}>Logout</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Quick Stats */}
@@ -200,58 +86,64 @@ const HomeScreen: React.FC = () => {
             <Text style={styles.seeAllText}>See All</Text>
           </TouchableOpacity>
         </View>
-        <FlatList
-          data={featuredCourses}
-          renderItem={renderCourseCard}
-          keyExtractor={(item) => item.id}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.coursesList}
-        />
+        <TouchableOpacity style={styles.courseCard} onPress={handleCoursePress}>
+          <Text style={styles.courseTitle}>React Native Fundamentals</Text>
+          <Text style={styles.courseDescription}>
+            Learn the basics of React Native development with hands-on projects
+          </Text>
+          <View style={styles.courseMeta}>
+            <Text style={styles.courseInstructor}>Instructor: John Doe</Text>
+            <Text style={styles.courseDuration}>2h 30m</Text>
+          </View>
+          <View style={styles.progressContainer}>
+            <View style={styles.progressBar}>
+              <View style={[styles.progressFill, { width: '65%' }]} />
+            </View>
+            <Text style={styles.progressText}>65% Complete</Text>
+          </View>
+        </TouchableOpacity>
       </View>
 
-      {/* Recent Courses */}
+      {/* Recent Activity */}
       <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Continue Learning</Text>
-          <TouchableOpacity>
-            <Text style={styles.seeAllText}>See All</Text>
+        <Text style={styles.sectionTitle}>Recent Activity</Text>
+        <View style={styles.activityCard}>
+          <Text style={styles.activityTitle}>✅ Completed Lesson 5</Text>
+          <Text style={styles.activityDescription}>React Native Navigation</Text>
+          <Text style={styles.activityTime}>2 hours ago</Text>
+        </View>
+        <View style={styles.activityCard}>
+          <Text style={styles.activityTitle}>🎯 Quiz Completed</Text>
+          <Text style={styles.activityDescription}>JavaScript Fundamentals</Text>
+          <Text style={styles.activityTime}>1 day ago</Text>
+        </View>
+      </View>
+
+      {/* Quick Actions */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Quick Actions</Text>
+        <View style={styles.actionsContainer}>
+          <TouchableOpacity style={styles.actionButton} onPress={handleCoursePress}>
+            <Text style={styles.actionIcon}>📚</Text>
+            <Text style={styles.actionText}>Browse Courses</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.actionButton} onPress={handleQuizPress}>
+            <Text style={styles.actionIcon}>🧠</Text>
+            <Text style={styles.actionText}>Take Quiz</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.actionButton} onPress={handleProgressPress}>
+            <Text style={styles.actionIcon}>📊</Text>
+            <Text style={styles.actionText}>View Progress</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.actionButton}>
+            <Text style={styles.actionIcon}>🏆</Text>
+            <Text style={styles.actionText}>Achievements</Text>
           </TouchableOpacity>
         </View>
-        <FlatList
-          data={recentCourses}
-          renderItem={renderCourseCard}
-          keyExtractor={(item) => item.id}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.coursesList}
-        />
       </View>
 
-      {/* Achievements */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Recent Achievements</Text>
-        <FlatList
-          data={achievements}
-          renderItem={renderAchievement}
-          keyExtractor={(item) => item.id}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.achievementsList}
-        />
-      </View>
-
-      {/* Categories */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Browse Categories</Text>
-        <View style={styles.categoriesGrid}>
-          {COURSE_CATEGORIES.slice(0, 6).map((category, index) => (
-            <TouchableOpacity key={index} style={styles.categoryCard}>
-              <Text style={styles.categoryText}>{category}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View>
+      {/* Bottom spacing */}
+      <View style={styles.bottomSpacing} />
     </ScrollView>
   );
 };
@@ -261,9 +153,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F8F9FA',
   },
-  welcomeSection: {
-    padding: 20,
+  header: {
     backgroundColor: '#6200EE',
+    paddingTop: 20,
+    paddingBottom: 24,
+    paddingHorizontal: 20,
+  },
+  headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   welcomeText: {
     fontSize: 24,
@@ -275,18 +174,29 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#E0E0E0',
   },
+  logoutButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  logoutButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '500',
+  },
   statsContainer: {
     flexDirection: 'row',
     padding: 20,
     backgroundColor: '#FFFFFF',
     marginTop: -10,
     marginHorizontal: 20,
-    borderRadius: 12,
+    borderRadius: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowRadius: 8,
+    elevation: 4,
   },
   statCard: {
     flex: 1,
@@ -296,15 +206,14 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: '#6200EE',
+    marginBottom: 4,
   },
   statLabel: {
     fontSize: 12,
     color: '#666666',
-    marginTop: 4,
   },
   section: {
-    marginTop: 20,
-    paddingHorizontal: 20,
+    margin: 20,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -322,48 +231,36 @@ const styles = StyleSheet.create({
     color: '#6200EE',
     fontWeight: '500',
   },
-  coursesList: {
-    paddingRight: 20,
-  },
   courseCard: {
-    width: 200,
     backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    marginRight: 16,
+    padding: 20,
+    borderRadius: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  courseThumbnail: {
-    width: '100%',
-    height: 120,
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
-  },
-  courseInfo: {
-    padding: 12,
+    shadowRadius: 8,
+    elevation: 4,
   },
   courseTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '600',
     color: '#000000',
-    marginBottom: 4,
+    marginBottom: 8,
   },
-  courseInstructor: {
+  courseDescription: {
     fontSize: 14,
     color: '#666666',
-    marginBottom: 8,
+    lineHeight: 20,
+    marginBottom: 12,
   },
   courseMeta: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    marginBottom: 16,
   },
-  courseRating: {
+  courseInstructor: {
     fontSize: 12,
-    color: '#FF9800',
+    color: '#666666',
   },
   courseDuration: {
     fontSize: 12,
@@ -375,86 +272,77 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     flex: 1,
-    height: 4,
+    height: 6,
     backgroundColor: '#E0E0E0',
-    borderRadius: 2,
-    marginRight: 8,
+    borderRadius: 3,
+    marginRight: 12,
   },
   progressFill: {
     height: '100%',
     backgroundColor: '#6200EE',
-    borderRadius: 2,
+    borderRadius: 3,
   },
   progressText: {
     fontSize: 12,
     color: '#6200EE',
     fontWeight: '500',
   },
-  achievementsList: {
-    paddingRight: 20,
-  },
-  achievementCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  activityCard: {
     backgroundColor: '#FFFFFF',
     padding: 16,
     borderRadius: 12,
-    marginRight: 16,
-    width: 250,
+    marginBottom: 12,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
     shadowRadius: 4,
-    elevation: 3,
+    elevation: 2,
   },
-  lockedAchievement: {
-    opacity: 0.5,
-  },
-  achievementIcon: {
-    fontSize: 32,
-    marginRight: 12,
-  },
-  achievementInfo: {
-    flex: 1,
-  },
-  achievementTitle: {
+  activityTitle: {
     fontSize: 16,
     fontWeight: '600',
     color: '#000000',
     marginBottom: 4,
   },
-  achievementDescription: {
+  activityDescription: {
     fontSize: 14,
     color: '#666666',
     marginBottom: 4,
   },
-  achievementPoints: {
+  activityTime: {
     fontSize: 12,
-    color: '#6200EE',
-    fontWeight: '500',
+    color: '#999999',
   },
-  categoriesGrid: {
+  actionsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
-  categoryCard: {
+  actionButton: {
     width: '48%',
     backgroundColor: '#FFFFFF',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
+    padding: 20,
+    borderRadius: 16,
     alignItems: 'center',
+    marginBottom: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  categoryText: {
+  actionIcon: {
+    fontSize: 24,
+    marginBottom: 8,
+  },
+  actionText: {
     fontSize: 14,
-    fontWeight: '500',
     color: '#000000',
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  bottomSpacing: {
+    height: 40,
   },
 });
 

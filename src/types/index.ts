@@ -138,7 +138,7 @@ export type RootStackParamList = {
 
 export type AuthStackParamList = {
   Login: undefined;
-  Register: undefined;
+  Signup: undefined;
   ForgotPassword: undefined;
 };
 
@@ -147,6 +147,14 @@ export type MainTabParamList = {
   Courses: undefined;
   Progress: undefined;
   Profile: undefined;
+};
+
+export type DrawerParamList = {
+  Main: undefined;
+  Settings: undefined;
+  Achievements: undefined;
+  Help: undefined;
+  About: undefined;
 };
 
 // API Types

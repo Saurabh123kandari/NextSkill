@@ -1,8 +1,12 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { User } from '../types';
-import { STORAGE_KEYS } from '../constants';
-import { authService } from '../services/auth/AuthService';
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+}
 
 interface AuthState {
   user: User | null;
@@ -13,14 +17,12 @@ interface AuthState {
 
 interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<void>;
-  register: (userData: RegisterData) => Promise<void>;
+  signup: (userData: SignupData) => Promise<void>;
   logout: () => Promise<void>;
-  forgotPassword: (email: string) => Promise<void>;
-  updateProfile: (userData: Partial<User>) => Promise<void>;
   clearError: () => void;
 }
 
-interface RegisterData {
+interface SignupData {
   name: string;
   email: string;
   password: string;
@@ -32,14 +34,13 @@ type AuthAction =
   | { type: 'AUTH_SUCCESS'; payload: User }
   | { type: 'AUTH_FAILURE'; payload: string }
   | { type: 'LOGOUT' }
-  | { type: 'UPDATE_USER'; payload: User }
   | { type: 'CLEAR_ERROR' }
   | { type: 'SET_LOADING'; payload: boolean };
 
 const initialState: AuthState = {
   user: null,
   isAuthenticated: false,
-  isLoading: true,
+  isLoading: false,
   error: null,
 };
 
@@ -74,11 +75,6 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
         isAuthenticated: false,
         isLoading: false,
         error: null,
-      };
-    case 'UPDATE_USER':
-      return {
-        ...state,
-        user: action.payload,
       };
     case 'CLEAR_ERROR':
       return {
@@ -119,18 +115,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const checkAuthStatus = async () => {
     try {
-      const token = await AsyncStorage.getItem(STORAGE_KEYS.USER_TOKEN);
-      const userData = await AsyncStorage.getItem(STORAGE_KEYS.USER_DATA);
-
-      if (token && userData) {
+      const userData = await AsyncStorage.getItem('user_data');
+      if (userData) {
         const user = JSON.parse(userData);
         dispatch({ type: 'AUTH_SUCCESS', payload: user });
-      } else {
-        dispatch({ type: 'SET_LOADING', payload: false });
       }
     } catch (error) {
       console.error('Error checking auth status:', error);
-      dispatch({ type: 'SET_LOADING', payload: false });
     }
   };
 
@@ -138,78 +129,59 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       dispatch({ type: 'AUTH_START' });
 
-      const response = await authService.login(email, password);
-      
-      // Store authentication data
-      await AsyncStorage.setItem(STORAGE_KEYS.USER_TOKEN, response.token);
-      await AsyncStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(response.user));
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
-      dispatch({ type: 'AUTH_SUCCESS', payload: response.user });
+      // Mock authentication - in real app, this would be an API call
+      if (email === 'demo@nextskill.com' && password === 'password') {
+        const user: User = {
+          id: '1',
+          name: 'Demo User',
+          email: email,
+          avatar: undefined,
+        };
+
+        await AsyncStorage.setItem('user_data', JSON.stringify(user));
+        dispatch({ type: 'AUTH_SUCCESS', payload: user });
+      } else {
+        throw new Error('Invalid email or password');
+      }
     } catch (error: any) {
       dispatch({ type: 'AUTH_FAILURE', payload: error.message || 'Login failed' });
       throw error;
     }
   };
 
-  const register = async (userData: RegisterData) => {
+  const signup = async (userData: SignupData) => {
     try {
       dispatch({ type: 'AUTH_START' });
 
-      const response = await authService.register(userData);
-      
-      // Store authentication data
-      await AsyncStorage.setItem(STORAGE_KEYS.USER_TOKEN, response.token);
-      await AsyncStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(response.user));
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
-      dispatch({ type: 'AUTH_SUCCESS', payload: response.user });
+      // Mock signup - in real app, this would be an API call
+      const user: User = {
+        id: Date.now().toString(),
+        name: userData.name,
+        email: userData.email,
+        avatar: undefined,
+      };
+
+      await AsyncStorage.setItem('user_data', JSON.stringify(user));
+      dispatch({ type: 'AUTH_SUCCESS', payload: user });
     } catch (error: any) {
-      dispatch({ type: 'AUTH_FAILURE', payload: error.message || 'Registration failed' });
+      dispatch({ type: 'AUTH_FAILURE', payload: error.message || 'Signup failed' });
       throw error;
     }
   };
 
   const logout = async () => {
     try {
-      await authService.logout();
-      
-      // Clear stored data
-      await AsyncStorage.multiRemove([
-        STORAGE_KEYS.USER_TOKEN,
-        STORAGE_KEYS.USER_DATA,
-      ]);
-
+      await AsyncStorage.removeItem('user_data');
       dispatch({ type: 'LOGOUT' });
     } catch (error) {
       console.error('Error during logout:', error);
-      // Still logout locally even if server logout fails
       dispatch({ type: 'LOGOUT' });
-    }
-  };
-
-  const forgotPassword = async (email: string) => {
-    try {
-      dispatch({ type: 'AUTH_START' });
-      await authService.forgotPassword(email);
-      dispatch({ type: 'SET_LOADING', payload: false });
-    } catch (error: any) {
-      dispatch({ type: 'AUTH_FAILURE', payload: error.message || 'Password reset failed' });
-      throw error;
-    }
-  };
-
-  const updateProfile = async (userData: Partial<User>) => {
-    try {
-      dispatch({ type: 'AUTH_START' });
-
-      const updatedUser = await authService.updateProfile(userData);
-      
-      // Update stored user data
-      await AsyncStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(updatedUser));
-
-      dispatch({ type: 'UPDATE_USER', payload: updatedUser });
-    } catch (error: any) {
-      dispatch({ type: 'AUTH_FAILURE', payload: error.message || 'Profile update failed' });
-      throw error;
     }
   };
 
@@ -220,10 +192,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const value: AuthContextType = {
     ...state,
     login,
-    register,
+    signup,
     logout,
-    forgotPassword,
-    updateProfile,
     clearError,
   };
 
