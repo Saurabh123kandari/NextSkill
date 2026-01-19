@@ -29,6 +29,9 @@ const AuthNavigator = () => {
   );
 };
 
+// Import TestPersistenceScreen
+import TestPersistenceScreen from '@/screens/TestPersistenceScreen';
+
 // Simple Main Navigator
 const MainNavigator = () => {
   return (
@@ -43,6 +46,11 @@ const MainNavigator = () => {
         name="Home"
         component={HomeScreen}
         options={{ title: 'NextSkill' }}
+      />
+      <Stack.Screen
+        name="TestPersistence"
+        component={TestPersistenceScreen}
+        options={{ title: 'SQLite Persistence Test' }}
       />
     </Stack.Navigator>
   );

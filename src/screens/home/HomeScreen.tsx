@@ -8,6 +8,11 @@ import {
   Alert,
 } from 'react-native';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '@/types';
+
+type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 
 interface HomeScreenProps {
   onLogout: () => void;
@@ -15,6 +20,7 @@ interface HomeScreenProps {
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
   const { user } = useAuth();
+  const navigation = useNavigation<HomeScreenNavigationProp>();
 
   const handleLogout = () => {
     Alert.alert(
@@ -37,6 +43,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
 
   const handleProgressPress = () => {
     Alert.alert('Progress', 'Progress tracking will be implemented soon.');
+  };
+  
+  const navigateToTestPersistence = () => {
+    navigation.navigate('TestPersistence');
   };
 
   return (
@@ -138,6 +148,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
           <TouchableOpacity style={styles.actionButton}>
             <Text style={styles.actionIcon}>🏆</Text>
             <Text style={styles.actionText}>Achievements</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.actionButton} onPress={navigateToTestPersistence}>
+            <Text style={styles.actionIcon}>🔄</Text>
+            <Text style={styles.actionText}>Test Persistence</Text>
           </TouchableOpacity>
         </View>
       </View>
