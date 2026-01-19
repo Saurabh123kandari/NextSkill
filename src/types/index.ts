@@ -14,18 +14,16 @@ export interface Course {
   id: string;
   title: string;
   description: string;
-  instructor: string;
-  thumbnail: string;
-  duration: number; // in minutes
-  level: 'beginner' | 'intermediate' | 'advanced';
   category: string;
-  rating: number;
-  studentsCount: number;
-  lessons: Lesson[];
-  isEnrolled: boolean;
-  progress: number; // percentage
-  createdAt: Date;
-  updatedAt: Date;
+  difficulty?: string;
+  level?: string;
+  duration: number;
+  imageUrl?: string;
+  thumbnail?: string;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
+  offline?: boolean;
+  lessons?: Lesson[];
 }
 
 export interface Lesson {
@@ -33,13 +31,18 @@ export interface Lesson {
   courseId: string;
   title: string;
   description: string;
-  type: 'video' | 'text' | 'quiz' | 'assignment';
-  content: string; // URL or text content
-  duration: number; // in minutes
+  content: string;
   order: number;
-  isCompleted: boolean;
-  isLocked: boolean;
+  duration: number;
+  videoUrl?: string;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
+  type?: 'video' | 'text' | 'quiz';
+  isCompleted?: boolean;
+  isLocked?: boolean;
+  offline?: boolean;
   resources?: Resource[];
+  quiz?: Quiz;
 }
 
 export interface Resource {
@@ -134,6 +137,7 @@ export type RootStackParamList = {
   QuizDetail: { quizId: string; courseId?: string };
   Profile: undefined;
   Settings: undefined;
+  TestPersistence: undefined;
 };
 
 export type AuthStackParamList = {
@@ -166,13 +170,12 @@ export interface ApiResponse<T> {
 }
 
 export interface PaginatedResponse<T> {
-  data: T[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
+  items: T[];
+  page: number;
+  limit: number;
+  total: number;
+  totalPages?: number;
+  offline?: boolean;
 }
 
 // Theme Types

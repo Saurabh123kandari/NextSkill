@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query/react';
 import { authApi } from './api/authApi';
 import { courseApi } from './api/courseApi';
+import { courseApiWithPersistence } from './api/courseApiWithPersistence';
 import { quizApi } from './api/quizApi';
 import authSlice from './slices/authSlice';
 import courseSlice from './slices/courseSlice';
@@ -12,6 +13,7 @@ export const store = configureStore({
     // API slices
     [authApi.reducerPath]: authApi.reducer,
     [courseApi.reducerPath]: courseApi.reducer,
+    [courseApiWithPersistence.reducerPath]: courseApiWithPersistence.reducer,
     [quizApi.reducerPath]: quizApi.reducer,
     
     // Feature slices
@@ -33,6 +35,7 @@ export const store = configureStore({
     })
       .concat(authApi.middleware)
       .concat(courseApi.middleware)
+      .concat(courseApiWithPersistence.middleware)
       .concat(quizApi.middleware),
 });
 
