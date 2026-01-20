@@ -7,6 +7,8 @@ import { quizApi } from './api/quizApi';
 import authSlice from './slices/authSlice';
 import courseSlice from './slices/courseSlice';
 import uiSlice from './slices/uiSlice';
+import quizSlice from './slices/quizSlice';
+import { authMiddleware } from './middleware/authMiddleware';
 
 export const store = configureStore({
   reducer: {
@@ -20,6 +22,7 @@ export const store = configureStore({
     auth: authSlice,
     course: courseSlice,
     ui: uiSlice,
+    quiz: quizSlice,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -31,8 +34,14 @@ export const store = configureStore({
           'persist/PURGE',
           'persist/REGISTER',
         ],
+        ignoredPaths: [
+          'auth.user.createdAt',
+          'auth.user.updatedAt',
+          'quiz.lastResult.timestamp',
+        ],
       },
     })
+      .concat(authMiddleware)
       .concat(authApi.middleware)
       .concat(courseApi.middleware)
       .concat(courseApiWithPersistence.middleware)

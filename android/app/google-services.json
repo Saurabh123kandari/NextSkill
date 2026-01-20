@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "935982948413",
+    "project_id": "nextskill-c3b71",
+    "storage_bucket": "nextskill-c3b71.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:935982948413:android:d35fad3a17438f53fb4a54",
+        "android_client_info": {
+          "package_name": "com.nextskill"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCa0bvNplMTepK-vS46VJ-dxpbx5GVaanw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

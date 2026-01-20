@@ -1,13 +1,26 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { RootState } from '../index';
-import { Quiz, Question, QuizAttempt, Answer, ApiResponse } from '@/types';
+import {
+  Quiz,
+  Question,
+  QuizAttempt,
+  Answer,
+} from '@/types';
 
+/**
+ * NextSkill Backend API for Quiz Management
+ * This is for future use with a custom backend that requires authentication.
+ * 
+ * Note: We avoid importing RootState from '../index' to prevent circular dependencies.
+ * Instead, we use an inline type assertion for getState.
+ */
 export const quizApi = createApi({
   reducerPath: 'quizApi',
   baseQuery: fetchBaseQuery({
     baseUrl: 'https://api.nextskill.com/quizzes',
     prepareHeaders: (headers, { getState }) => {
-      const token = (getState() as RootState).auth.token;
+      // Use inline type to avoid circular dependency with store/index.ts
+      const state = getState() as { auth: { token: string | null } };
+      const token = state.auth.token;
       if (token) {
         headers.set('authorization', `Bearer ${token}`);
       }

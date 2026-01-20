@@ -137,6 +137,19 @@ class DatabaseService {
         unlocked_at DATETIME,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )`,
+
+      // Quiz Results table (for tracking completed quizzes)
+      `CREATE TABLE IF NOT EXISTS quiz_results (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        quiz_id TEXT NOT NULL,
+        category TEXT NOT NULL,
+        difficulty TEXT,
+        score INTEGER NOT NULL,
+        total_questions INTEGER NOT NULL,
+        percentage INTEGER NOT NULL,
+        passed INTEGER DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )`,
     ];
 
     for (const table of tables) {

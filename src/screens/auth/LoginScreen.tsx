@@ -11,21 +11,28 @@ import {
   ScrollView,
   ActivityIndicator,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { useAppDispatch } from '@/store/hooks';
+import { useLoginMutation, useGoogleSignInMutation, useForgotPasswordMutation } from '@/store/api/authApi';
+import { setCredentials } from '@/store/slices/authSlice';
+import { AuthStackParamList } from '@/types';
+import Toast from 'react-native-toast-message';
 
-interface LoginScreenProps {
-  onLogin: (email: string, password: string) => Promise<void>;
-  onNavigateToSignup: () => void;
-  isLoading?: boolean;
-}
+type LoginScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'Login'>;
 
-const LoginScreen: React.FC<LoginScreenProps> = ({
-  onLogin,
-  onNavigateToSignup,
-  isLoading = false,
-}) => {
+const LoginScreen: React.FC = () => {
+  const navigation = useNavigation<LoginScreenNavigationProp>();
+  const dispatch = useAppDispatch();
+  const [login, { isLoading: isLoginLoading }] = useLoginMutation();
+  const [googleSignIn, { isLoading: isGoogleLoading }] = useGoogleSignInMutation();
+  const [forgotPassword] = useForgotPasswordMutation();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  
+  const isLoading = isLoginLoading || isGoogleLoading;
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -55,18 +62,64 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
     if (!validateForm()) return;
 
     try {
-      await onLogin(email.trim(), password);
+      const result = await login({ email: email.trim(), password }).unwrap();
+      dispatch(setCredentials({ user: result.user, token: result.token }));
+      Toast.show({
+        type: 'success',
+        text1: 'Welcome back!',
+        text2: 'You have successfully signed in.',
+      });
     } catch (error: any) {
-      Alert.alert('Login Failed', error.message || 'An error occurred during login');
+      const errorMessage = error?.data?.message || error?.message || 'An error occurred during login';
+      Toast.show({
+        type: 'error',
+        text1: 'Login Failed',
+        text2: errorMessage,
+      });
     }
   };
 
-  const handleForgotPassword = () => {
-    Alert.alert(
-      'Forgot Password',
-      'Password reset functionality will be implemented soon.',
-      [{ text: 'OK' }]
-    );
+  const handleGoogleSignIn = async () => {
+    try {
+      const result = await googleSignIn().unwrap();
+      dispatch(setCredentials({ user: result.user, token: result.token }));
+      Toast.show({
+        type: 'success',
+        text1: 'Welcome!',
+        text2: 'You have successfully signed in with Google.',
+      });
+    } catch (error: any) {
+      const errorMessage = error?.data?.message || error?.message || 'An error occurred during Google Sign-In';
+      Toast.show({
+        type: 'error',
+        text1: 'Google Sign-In Failed',
+        text2: errorMessage,
+      });
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email.trim()) {
+      Alert.alert('Email Required', 'Please enter your email address first.');
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      Alert.alert('Invalid Email', 'Please enter a valid email address.');
+      return;
+    }
+
+    try {
+      await forgotPassword({ email: email.trim() }).unwrap();
+      Alert.alert(
+        'Password Reset Email Sent',
+        'Please check your email for instructions to reset your password.',
+        [{ text: 'OK' }]
+      );
+    } catch (error: any) {
+      const errorMessage = error?.data?.message || error?.message || 'Failed to send password reset email';
+      Alert.alert('Error', errorMessage);
+    }
   };
 
   return (
@@ -151,7 +204,10 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
 
           {/* Social Login */}
           <View style={styles.socialContainer}>
-            <TouchableOpacity style={styles.socialButton} disabled={isLoading}>
+            <TouchableOpacity
+              style={styles.socialButton}
+              onPress={handleGoogleSignIn}
+              disabled={isLoading}>
               <Text style={styles.socialButtonText}>Continue with Google</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.socialButton} disabled={isLoading}>
@@ -162,7 +218,9 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
           {/* Footer */}
           <View style={styles.footer}>
             <Text style={styles.footerText}>Don't have an account? </Text>
-            <TouchableOpacity onPress={onNavigateToSignup} disabled={isLoading}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Signup')}
+              disabled={isLoading}>
               <Text style={styles.signUpText}>Sign Up</Text>
             </TouchableOpacity>
           </View>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -7,28 +7,94 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import { useAuth } from '../../contexts/AuthContext';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { useAppSelector, useAppDispatch } from '@/store/hooks';
+import { useLogoutMutation } from '@/store/api/authApi';
+import { logout } from '@/store/slices/authSlice';
 import { RootStackParamList } from '@/types';
+import Toast from 'react-native-toast-message';
+import { quizResultRepository } from '@/services/database/repositories/QuizResultRepository';
+import { formatTimeAgo } from '@/utils/dateUtils';
+import { QuizResultRecord } from '@/services/database/models';
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 
-interface HomeScreenProps {
-  onLogout: () => void;
+// Activity type for recent activity display
+interface Activity {
+  type: 'QUIZ' | 'LESSON' | 'COURSE';
+  title: string;
+  subtitle: string;
+  time: string;
+  score?: number;
 }
 
-const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
-  const { user } = useAuth();
+const HomeScreen: React.FC = () => {
+  const { user } = useAppSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
+  const [logoutMutation] = useLogoutMutation();
   const navigation = useNavigation<HomeScreenNavigationProp>();
 
-  const handleLogout = () => {
+  // Dynamic stats state
+  const [quizCount, setQuizCount] = useState(0);
+  const [recentActivity, setRecentActivity] = useState<Activity[]>([]);
+
+  // Load dashboard stats when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      loadDashboardStats();
+    }, [])
+  );
+
+  const loadDashboardStats = async () => {
+    try {
+      // Get quiz count from database
+      const count = await quizResultRepository.getQuizCount();
+      setQuizCount(count);
+
+      // Get recent quiz results for activity feed
+      const recentQuizzes = await quizResultRepository.getRecentResults(5);
+      
+      // Transform quiz results to activity format
+      const quizActivities: Activity[] = recentQuizzes.map((quiz: QuizResultRecord) => ({
+        type: 'QUIZ' as const,
+        title: 'Quiz Completed',
+        subtitle: quiz.category,
+        time: formatTimeAgo(quiz.created_at),
+        score: quiz.percentage,
+      }));
+
+      setRecentActivity(quizActivities);
+    } catch (error) {
+      console.error('Failed to load dashboard stats:', error);
+    }
+  };
+
+  const handleLogout = async () => {
     Alert.alert(
       'Logout',
       'Are you sure you want to logout?',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Logout', style: 'destructive', onPress: onLogout },
+        {
+          text: 'Logout',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await logoutMutation().unwrap();
+              dispatch(logout());
+              Toast.show({
+                type: 'success',
+                text1: 'Logged Out',
+                text2: 'You have been successfully logged out.',
+              });
+            } catch (error: any) {
+              // Still logout locally even if API call fails
+              dispatch(logout());
+              console.error('Logout error:', error);
+            }
+          },
+        },
       ]
     );
   };
@@ -38,7 +104,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
   };
 
   const handleQuizPress = () => {
-    Alert.alert('Quiz', 'Quiz functionality will be implemented soon.');
+    navigation.navigate('QuizCategory');
   };
 
   const handleProgressPress = () => {
@@ -47,6 +113,19 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
   
   const navigateToTestPersistence = () => {
     navigation.navigate('TestPersistence');
+  };
+
+  const getActivityIcon = (type: Activity['type']) => {
+    switch (type) {
+      case 'QUIZ':
+        return '🎯';
+      case 'LESSON':
+        return '✅';
+      case 'COURSE':
+        return '📚';
+      default:
+        return '📝';
+    }
   };
 
   return (
@@ -79,7 +158,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
           <Text style={styles.statLabel}>Lessons</Text>
         </View>
         <View style={styles.statCard}>
-          <Text style={styles.statNumber}>5</Text>
+          <Text style={styles.statNumber}>{quizCount}</Text>
           <Text style={styles.statLabel}>Quizzes</Text>
         </View>
         <View style={styles.statCard}>
@@ -117,16 +196,27 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
       {/* Recent Activity */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Recent Activity</Text>
-        <View style={styles.activityCard}>
-          <Text style={styles.activityTitle}>✅ Completed Lesson 5</Text>
-          <Text style={styles.activityDescription}>React Native Navigation</Text>
-          <Text style={styles.activityTime}>2 hours ago</Text>
-        </View>
-        <View style={styles.activityCard}>
-          <Text style={styles.activityTitle}>🎯 Quiz Completed</Text>
-          <Text style={styles.activityDescription}>JavaScript Fundamentals</Text>
-          <Text style={styles.activityTime}>1 day ago</Text>
-        </View>
+        {recentActivity.length > 0 ? (
+          recentActivity.map((activity, index) => (
+            <View key={index} style={styles.activityCard}>
+              <Text style={styles.activityTitle}>
+                {getActivityIcon(activity.type)} {activity.title}
+                {activity.score !== undefined && (
+                  <Text style={styles.activityScore}> - {activity.score}%</Text>
+                )}
+              </Text>
+              <Text style={styles.activityDescription}>{activity.subtitle}</Text>
+              <Text style={styles.activityTime}>{activity.time}</Text>
+            </View>
+          ))
+        ) : (
+          <View style={styles.activityCard}>
+            <Text style={styles.activityTitle}>📝 No recent activity</Text>
+            <Text style={styles.activityDescription}>
+              Take a quiz to see your activity here!
+            </Text>
+          </View>
+        )}
       </View>
 
       {/* Quick Actions */}
@@ -239,6 +329,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: '#000000',
+    marginBottom: 16,
   },
   seeAllText: {
     fontSize: 14,
@@ -317,6 +408,10 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#000000',
     marginBottom: 4,
+  },
+  activityScore: {
+    color: '#6200EE',
+    fontWeight: '600',
   },
   activityDescription: {
     fontSize: 14,

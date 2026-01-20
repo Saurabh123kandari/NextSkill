@@ -32,6 +32,11 @@ const AuthNavigator = () => {
 // Import TestPersistenceScreen
 import TestPersistenceScreen from '@/screens/TestPersistenceScreen';
 
+// Import Quiz Screens
+import QuizCategoryScreen from '@/screens/quiz/QuizCategoryScreen';
+import QuizScreen from '@/screens/quiz/QuizScreen';
+import QuizResultScreen from '@/screens/quiz/QuizResultScreen';
+
 // Simple Main Navigator
 const MainNavigator = () => {
   return (
@@ -51,6 +56,29 @@ const MainNavigator = () => {
         name="TestPersistence"
         component={TestPersistenceScreen}
         options={{ title: 'SQLite Persistence Test' }}
+      />
+      <Stack.Screen
+        name="QuizCategory"
+        component={QuizCategoryScreen}
+        options={{ title: 'Select Category' }}
+      />
+      <Stack.Screen
+        name="Quiz"
+        component={QuizScreen}
+        options={{
+          title: 'Quiz',
+          headerLeft: () => null, // Prevent back navigation during quiz
+          gestureEnabled: false,
+        }}
+      />
+      <Stack.Screen
+        name="QuizResult"
+        component={QuizResultScreen}
+        options={{
+          title: 'Results',
+          headerLeft: () => null, // Prevent back navigation to quiz
+          gestureEnabled: false,
+        }}
       />
     </Stack.Navigator>
   );

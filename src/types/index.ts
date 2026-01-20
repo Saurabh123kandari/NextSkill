@@ -5,8 +5,8 @@ export interface User {
   name: string;
   avatar?: string;
   role: 'student' | 'teacher' | 'admin';
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string; // ISO date string
+  updatedAt: string; // ISO date string
 }
 
 // Course Types
@@ -96,6 +96,66 @@ export interface Answer {
   timeSpent: number; // in seconds
 }
 
+// Open Trivia DB Types
+export interface OpenTriviaCategory {
+  id: number;
+  name: string;
+}
+
+export interface OpenTriviaQuestion {
+  category: string;
+  type: 'multiple' | 'boolean';
+  difficulty: 'easy' | 'medium' | 'hard';
+  question: string; // HTML encoded
+  correct_answer: string;
+  incorrect_answers: string[];
+}
+
+export interface OpenTriviaResponse {
+  response_code: number;
+  results: OpenTriviaQuestion[];
+}
+
+export interface OpenTriviaCategoryResponse {
+  trivia_categories: OpenTriviaCategory[];
+}
+
+// Processed Question for Quiz Screen
+export interface ProcessedQuestion {
+  id: string;
+  question: string;
+  options: string[];
+  correctAnswer: string;
+  category: string;
+  difficulty: string;
+}
+
+// Local Quiz Result (for tracking)
+export interface QuizResult {
+  id: string;
+  category: string;
+  difficulty: string;
+  score: number;
+  totalQuestions: number;
+  percentage: number;
+  timestamp: Date;
+  answers: QuizAnswerRecord[];
+}
+
+export interface QuizAnswerRecord {
+  question: string;
+  selectedAnswer: string;
+  correctAnswer: string;
+  isCorrect: boolean;
+}
+
+// Quiz Parameters for API
+export interface QuizParams {
+  amount?: number;
+  category?: number;
+  difficulty?: 'easy' | 'medium' | 'hard';
+}
+
 // Progress Types
 export interface Progress {
   id: string;
@@ -132,9 +192,13 @@ export interface Achievement {
 export type RootStackParamList = {
   Auth: undefined;
   Main: undefined;
+  Home: undefined;
   CourseDetail: { courseId: string };
   LessonDetail: { lessonId: string; courseId: string };
   QuizDetail: { quizId: string; courseId?: string };
+  QuizCategory: undefined;
+  Quiz: { category?: number; difficulty?: 'easy' | 'medium' | 'hard'; amount?: number };
+  QuizResult: { result: QuizResult };
   Profile: undefined;
   Settings: undefined;
   TestPersistence: undefined;

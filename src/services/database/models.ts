@@ -93,6 +93,19 @@ export interface Achievement {
   created_at: string;
 }
 
+// Quiz Result Record (for tracking completed quizzes)
+export interface QuizResultRecord {
+  id: number;
+  quiz_id: string;
+  category: string;
+  difficulty: string | null;
+  score: number;
+  total_questions: number;
+  percentage: number;
+  passed: number; // SQLite stores boolean as 0/1
+  created_at: string;
+}
+
 // Database operation result types
 export interface InsertResult {
   insertId: number;

@@ -11,12 +11,15 @@ import {
   ScrollView,
   ActivityIndicator,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { useAppDispatch } from '@/store/hooks';
+import { useSignupMutation, useGoogleSignInMutation } from '@/store/api/authApi';
+import { setCredentials } from '@/store/slices/authSlice';
+import { AuthStackParamList } from '@/types';
+import Toast from 'react-native-toast-message';
 
-interface SignupScreenProps {
-  onSignup: (userData: SignupData) => Promise<void>;
-  onNavigateToLogin: () => void;
-  isLoading?: boolean;
-}
+type SignupScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'Signup'>;
 
 interface SignupData {
   name: string;
@@ -25,11 +28,12 @@ interface SignupData {
   confirmPassword: string;
 }
 
-const SignupScreen: React.FC<SignupScreenProps> = ({
-  onSignup,
-  onNavigateToLogin,
-  isLoading = false,
-}) => {
+const SignupScreen: React.FC = () => {
+  const navigation = useNavigation<SignupScreenNavigationProp>();
+  const dispatch = useAppDispatch();
+  const [signup, { isLoading: isSignupLoading }] = useSignupMutation();
+  const [googleSignIn, { isLoading: isGoogleLoading }] = useGoogleSignInMutation();
+
   const [formData, setFormData] = useState<SignupData>({
     name: '',
     email: '',
@@ -37,6 +41,8 @@ const SignupScreen: React.FC<SignupScreenProps> = ({
     confirmPassword: '',
   });
   const [errors, setErrors] = useState<Partial<SignupData>>({});
+  
+  const isLoading = isSignupLoading || isGoogleLoading;
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -87,9 +93,43 @@ const SignupScreen: React.FC<SignupScreenProps> = ({
     if (!validateForm()) return;
 
     try {
-      await onSignup(formData);
+      const result = await signup({
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        password: formData.password,
+      }).unwrap();
+      dispatch(setCredentials({ user: result.user, token: result.token }));
+      Toast.show({
+        type: 'success',
+        text1: 'Account Created!',
+        text2: 'Welcome to NextSkill!',
+      });
     } catch (error: any) {
-      Alert.alert('Signup Failed', error.message || 'An error occurred during signup');
+      const errorMessage = error?.data?.message || error?.message || 'An error occurred during signup';
+      Toast.show({
+        type: 'error',
+        text1: 'Signup Failed',
+        text2: errorMessage,
+      });
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      const result = await googleSignIn().unwrap();
+      dispatch(setCredentials({ user: result.user, token: result.token }));
+      Toast.show({
+        type: 'success',
+        text1: 'Welcome!',
+        text2: 'You have successfully signed up with Google.',
+      });
+    } catch (error: any) {
+      const errorMessage = error?.data?.message || error?.message || 'An error occurred during Google Sign-In';
+      Toast.show({
+        type: 'error',
+        text1: 'Google Sign-In Failed',
+        text2: errorMessage,
+      });
     }
   };
 
@@ -219,7 +259,10 @@ const SignupScreen: React.FC<SignupScreenProps> = ({
 
           {/* Social Signup */}
           <View style={styles.socialContainer}>
-            <TouchableOpacity style={styles.socialButton} disabled={isLoading}>
+            <TouchableOpacity
+              style={styles.socialButton}
+              onPress={handleGoogleSignIn}
+              disabled={isLoading}>
               <Text style={styles.socialButtonText}>Sign up with Google</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.socialButton} disabled={isLoading}>
@@ -230,7 +273,9 @@ const SignupScreen: React.FC<SignupScreenProps> = ({
           {/* Footer */}
           <View style={styles.footer}>
             <Text style={styles.footerText}>Already have an account? </Text>
-            <TouchableOpacity onPress={onNavigateToLogin} disabled={isLoading}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Login')}
+              disabled={isLoading}>
               <Text style={styles.signInText}>Sign In</Text>
             </TouchableOpacity>
           </View>
