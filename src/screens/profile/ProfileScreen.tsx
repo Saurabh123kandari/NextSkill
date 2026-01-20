@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -7,10 +7,36 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import { useAuth } from '../../contexts/AuthContext';
+import { useFocusEffect } from '@react-navigation/native';
+import { useAppSelector, useAppDispatch } from '@/store/hooks';
+import { useLogoutMutation } from '@/store/api/authApi';
+import { logout } from '@/store/slices/authSlice';
+import Toast from 'react-native-toast-message';
+import { quizResultRepository } from '@/services/database/repositories/QuizResultRepository';
 
 const ProfileScreen: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user } = useAppSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
+  const [logoutMutation] = useLogoutMutation();
+
+  // Dynamic stats
+  const [quizCount, setQuizCount] = useState(0);
+
+  // Load stats when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      loadStats();
+    }, [])
+  );
+
+  const loadStats = async () => {
+    try {
+      const count = await quizResultRepository.getQuizCount();
+      setQuizCount(count);
+    } catch (error) {
+      console.error('Failed to load profile stats:', error);
+    }
+  };
 
   const handleLogout = () => {
     Alert.alert(
@@ -18,16 +44,34 @@ const ProfileScreen: React.FC = () => {
       'Are you sure you want to logout?',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Logout', style: 'destructive', onPress: logout },
+        {
+          text: 'Logout',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await logoutMutation().unwrap();
+              dispatch(logout());
+              Toast.show({
+                type: 'success',
+                text1: 'Logged Out',
+                text2: 'You have been successfully logged out.',
+              });
+            } catch (error: any) {
+              // Still logout locally even if API call fails
+              dispatch(logout());
+              console.error('Logout error:', error);
+            }
+          },
+        },
       ]
     );
   };
 
   const menuItems = [
-    { title: 'Edit Profile', icon: '✏️', onPress: () => {} },
-    { title: 'Settings', icon: '⚙️', onPress: () => {} },
-    { title: 'Help & Support', icon: '❓', onPress: () => {} },
-    { title: 'About', icon: 'ℹ️', onPress: () => {} },
+    { title: 'Edit Profile', icon: '✏️', onPress: () => Alert.alert('Coming Soon', 'Edit Profile feature will be available soon.') },
+    { title: 'Settings', icon: '⚙️', onPress: () => Alert.alert('Coming Soon', 'Settings feature will be available soon.') },
+    { title: 'Help & Support', icon: '❓', onPress: () => Alert.alert('Coming Soon', 'Help & Support feature will be available soon.') },
+    { title: 'About', icon: 'ℹ️', onPress: () => Alert.alert('About NextSkill', 'NextSkill v1.0.0\n\nYour personalized learning platform.') },
     { title: 'Logout', icon: '🚪', onPress: handleLogout, isDestructive: true },
   ];
 
@@ -56,7 +100,7 @@ const ProfileScreen: React.FC = () => {
             <Text style={styles.statLabel}>Lessons</Text>
           </View>
           <View style={styles.statCard}>
-            <Text style={styles.statNumber}>5</Text>
+            <Text style={styles.statNumber}>{quizCount}</Text>
             <Text style={styles.statLabel}>Quizzes</Text>
           </View>
         </View>

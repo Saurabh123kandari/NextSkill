@@ -9,11 +9,8 @@ import {
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { useAppSelector, useAppDispatch } from '@/store/hooks';
-import { useLogoutMutation } from '@/store/api/authApi';
-import { logout } from '@/store/slices/authSlice';
+import { useAppSelector } from '@/store/hooks';
 import { RootStackParamList } from '@/types';
-import Toast from 'react-native-toast-message';
 import { quizResultRepository } from '@/services/database/repositories/QuizResultRepository';
 import { formatTimeAgo } from '@/utils/dateUtils';
 import { QuizResultRecord } from '@/services/database/models';
@@ -31,8 +28,6 @@ interface Activity {
 
 const HomeScreen: React.FC = () => {
   const { user } = useAppSelector((state) => state.auth);
-  const dispatch = useAppDispatch();
-  const [logoutMutation] = useLogoutMutation();
   const navigation = useNavigation<HomeScreenNavigationProp>();
 
   // Dynamic stats state
@@ -70,33 +65,8 @@ const HomeScreen: React.FC = () => {
     }
   };
 
-  const handleLogout = async () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await logoutMutation().unwrap();
-              dispatch(logout());
-              Toast.show({
-                type: 'success',
-                text1: 'Logged Out',
-                text2: 'You have been successfully logged out.',
-              });
-            } catch (error: any) {
-              // Still logout locally even if API call fails
-              dispatch(logout());
-              console.error('Logout error:', error);
-            }
-          },
-        },
-      ]
-    );
+  const handleProfilePress = () => {
+    navigation.navigate('Profile');
   };
 
   const handleCoursePress = () => {
@@ -133,7 +103,7 @@ const HomeScreen: React.FC = () => {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerContent}>
-          <View>
+          <View style={styles.headerTextContainer}>
             <Text style={styles.welcomeText}>
               Welcome back, {user?.name || 'Student'}! 👋
             </Text>
@@ -141,8 +111,10 @@ const HomeScreen: React.FC = () => {
               Ready to continue your learning journey?
             </Text>
           </View>
-          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-            <Text style={styles.logoutButtonText}>Logout</Text>
+          <TouchableOpacity style={styles.profileButton} onPress={handleProfilePress}>
+            <Text style={styles.profileButtonText}>
+              {user?.name?.charAt(0).toUpperCase() || 'U'}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -268,26 +240,37 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  headerTextContainer: {
+    flex: 1,
+    flexShrink: 1,
+    marginRight: 12,
+  },
   welcomeText: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 'bold',
     color: '#FFFFFF',
     marginBottom: 4,
+    flexWrap: 'wrap',
   },
   welcomeSubtext: {
     fontSize: 16,
     color: '#E0E0E0',
   },
-  logoutButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
+  profileButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.5)',
+    flexShrink: 0,
   },
-  logoutButtonText: {
+  profileButtonText: {
     color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '500',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
   statsContainer: {
     flexDirection: 'row',

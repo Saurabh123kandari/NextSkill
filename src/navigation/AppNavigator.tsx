@@ -37,6 +37,9 @@ import QuizCategoryScreen from '@/screens/quiz/QuizCategoryScreen';
 import QuizScreen from '@/screens/quiz/QuizScreen';
 import QuizResultScreen from '@/screens/quiz/QuizResultScreen';
 
+// Import Profile Screen
+import ProfileScreen from '@/screens/profile/ProfileScreen';
+
 // Simple Main Navigator
 const MainNavigator = () => {
   return (
@@ -79,6 +82,11 @@ const MainNavigator = () => {
           headerLeft: () => null, // Prevent back navigation to quiz
           gestureEnabled: false,
         }}
+      />
+      <Stack.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{ title: 'Profile' }}
       />
     </Stack.Navigator>
   );
